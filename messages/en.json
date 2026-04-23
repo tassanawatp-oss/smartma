@@ -1,0 +1,74 @@
+{
+  "nav": {
+    "contracts": "Contracts",
+    "tickets": "Tickets",
+    "reports": "Reports",
+    "jiraSync": "Jira Sync",
+    "users": "Users",
+    "settings": "Settings"
+  },
+  "status": {
+    "OPEN": "Open",
+    "IN_PROGRESS": "In Progress",
+    "RESOLVED": "Resolved",
+    "CLOSED": "Closed"
+  },
+  "priority": {
+    "P1": "Critical",
+    "P2": "High",
+    "P3": "Normal",
+    "P4": "Low"
+  },
+  "type": {
+    "HW": "Hardware",
+    "SW": "Software"
+  },
+  "sector": {
+    "GOV": "Government",
+    "PRIVATE": "Private"
+  },
+  "role": {
+    "ADMIN": "Administrator",
+    "PM": "Project Manager",
+    "STAFF": "Staff"
+  },
+  "contract": {
+    "title": "Contracts",
+    "all": "All",
+    "gov": "Government",
+    "private": "Private",
+    "new": "New Contract",
+    "totalContracts": "Total Contracts",
+    "openTickets": "Open Tickets",
+    "inProgress": "In Progress",
+    "jiraSync": "Jira Last Sync"
+  },
+  "ticket": {
+    "new": "Open Ticket",
+    "all": "All",
+    "subject": "Subject",
+    "type": "Type",
+    "priority": "Priority",
+    "status": "Status",
+    "assignee": "Assignee",
+    "updated": "Updated"
+  },
+  "common": {
+    "search": "Search...",
+    "export": "Export",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "loading": "Loading...",
+    "noData": "No data"
+  },
+  "auth": {
+    "login": "Sign In",
+    "email": "Email",
+    "password": "Password",
+    "loginBtn": "Sign In",
+    "loginError": "Invalid email or password"
+  }
+}

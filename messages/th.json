@@ -1,0 +1,74 @@
+{
+  "nav": {
+    "contracts": "สัญญา / โปรเจกต์",
+    "tickets": "Tickets",
+    "reports": "รายงาน",
+    "jiraSync": "Jira Sync",
+    "users": "ผู้ใช้งาน",
+    "settings": "ตั้งค่า"
+  },
+  "status": {
+    "OPEN": "Open",
+    "IN_PROGRESS": "In Progress",
+    "RESOLVED": "แก้ไขแล้ว",
+    "CLOSED": "ปิด"
+  },
+  "priority": {
+    "P1": "ด่วนมาก",
+    "P2": "ด่วน",
+    "P3": "ปกติ",
+    "P4": "ต่ำ"
+  },
+  "type": {
+    "HW": "Hardware",
+    "SW": "Software"
+  },
+  "sector": {
+    "GOV": "ภาครัฐ",
+    "PRIVATE": "เอกชน"
+  },
+  "role": {
+    "ADMIN": "ผู้ดูแลระบบ",
+    "PM": "Project Manager",
+    "STAFF": "Staff"
+  },
+  "contract": {
+    "title": "สัญญา / โปรเจกต์",
+    "all": "ทั้งหมด",
+    "gov": "ภาครัฐ",
+    "private": "เอกชน",
+    "new": "เพิ่มสัญญาใหม่",
+    "totalContracts": "สัญญาทั้งหมด",
+    "openTickets": "Tickets เปิดอยู่",
+    "inProgress": "In Progress",
+    "jiraSync": "Jira Last Sync"
+  },
+  "ticket": {
+    "new": "เปิด Ticket ใหม่",
+    "all": "ทั้งหมด",
+    "subject": "หัวข้อ",
+    "type": "ประเภท",
+    "priority": "Priority",
+    "status": "Status",
+    "assignee": "ผู้รับผิดชอบ",
+    "updated": "อัปเดต"
+  },
+  "common": {
+    "search": "ค้นหา...",
+    "export": "Export",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "back": "กลับ",
+    "loading": "กำลังโหลด...",
+    "noData": "ไม่มีข้อมูล"
+  },
+  "auth": {
+    "login": "เข้าสู่ระบบ",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "loginBtn": "เข้าสู่ระบบ",
+    "loginError": "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+  }
+}

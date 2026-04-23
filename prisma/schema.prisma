@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  PM
+  STAFF
+}
+
+enum Sector {
+  GOV
+  PRIVATE
+}
+
+enum TicketType {
+  HW
+  SW
+}
+
+enum Priority {
+  P1
+  P2
+  P3
+  P4
+}
+
+enum Status {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  role      Role     @default(STAFF)
+  password  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  contracts  ContractMember[]
+  tickets    Ticket[]         @relation("AssignedTickets")
+  comments   Comment[]
+  auditLogs  AuditLog[]
+}
+
+model Contract {
+  id             String   @id @default(cuid())
+  name           String
+  sector         Sector
+  serviceType    String
+  startDate      DateTime
+  endDate        DateTime
+  pmId           String
+  jiraProjectKey String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  tickets    Ticket[]
+  members    ContractMember[]
+  jiraConfig JiraConfig?
+}
+
+model ContractMember {
+  contractId String
+  userId     String
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([contractId, userId])
+}
+
+model Ticket {
+  id          String     @id @default(cuid())
+  contractId  String
+  title       String
+  description String     @default("")
+  type        TicketType
+  priority    Priority
+  status      Status     @default(OPEN)
+  assigneeId  String?
+  jiraKey     String?
+  jiraSyncAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  contract    Contract     @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  assignee    User?        @relation("AssignedTickets", fields: [assigneeId], references: [id])
+  comments    Comment[]
+  attachments Attachment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User   @relation(fields: [authorId], references: [id])
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  name      String
+  url       String
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+}
+
+model JiraConfig {
+  id         String   @id @default(cuid())
+  host       String
+  email      String
+  apiToken   String
+  projectKey String
+  contractId String   @unique
+  updatedAt  DateTime @updatedAt
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+}
+
+model SyncLog {
+  id         String   @id @default(cuid())
+  contractId String?
+  ticketId   String?
+  action     String
+  status     String
+  message    String   @default("")
+  createdAt  DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  userEmail  String   @default("")
+  action     String
+  resource   String
+  resourceId String?
+  meta       Json?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
