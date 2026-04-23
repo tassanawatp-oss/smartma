@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { Card, CardHeader, CardBody } from '@/components/ui/Card'
 import { Toggle } from '@/components/ui/Toggle'
 import { useParams } from 'next/navigation'
@@ -9,87 +9,13 @@ const SUB_SECTIONS = [
   { key: 'general', label: 'ทั่วไป', icon: '⚙️' },
   { key: 'notifications', label: 'การแจ้งเตือน', icon: '🔔' },
   { key: 'jira', label: 'Jira API', icon: '🔗' },
-  { key: 'logs', label: 'System Log', icon: '📋' },
   { key: 'danger', label: 'Danger Zone', icon: '⚠️' },
 ]
-
-type AuditLog = {
-  id: string
-  userId: string | null
-  userEmail: string
-  action: string
-  resource: string
-  resourceId: string | null
-  meta: Record<string, unknown> | null
-  createdAt: string
-}
-
-const ALL_ACTIONS = [
-  'LOGIN', 'LOGOUT',
-  'CREATE_USER', 'UPDATE_USER',
-  'CREATE_CONTRACT', 'UPDATE_CONTRACT', 'DELETE_CONTRACT',
-  'CREATE_TICKET', 'UPDATE_TICKET',
-  'CONFIG_JIRA', 'JIRA_SYNC', 'CLEAR_SYNC_LOG',
-]
-
-function exportToCsv(logs: AuditLog[]) {
-  const header = 'วันเวลา,ผู้ใช้,Action,Resource,Resource ID,รายละเอียด'
-  const rows = logs.map((l) => {
-    const meta = l.meta ? JSON.stringify(l.meta).replace(/"/g, '""') : ''
-    return [
-      new Date(l.createdAt).toLocaleString('th-TH'),
-      l.userEmail,
-      l.action,
-      l.resource,
-      l.resourceId ?? '',
-      `"${meta}"`,
-    ].join(',')
-  })
-  const csv = [header, ...rows].join('\n')
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `system-log-${new Date().toISOString().slice(0, 10)}.csv`
-  a.click()
-  URL.revokeObjectURL(url)
-}
 
 export default function SettingsPage() {
   const { locale } = useParams() as { locale: string }
   const [active, setActive] = useState('general')
   const [notifs, setNotifs] = useState({ ticketOpen: true, ticketDone: true, jiraSync: false })
-
-  // System Log state
-  const [logs, setLogs] = useState<AuditLog[]>([])
-  const [logLoading, setLogLoading] = useState(false)
-  const [logFrom, setLogFrom] = useState('')
-  const [logTo, setLogTo] = useState('')
-  const [logAction, setLogAction] = useState('')
-
-  const fetchLogs = useCallback(async (isExport = false) => {
-    setLogLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (logFrom) params.set('from', logFrom)
-      if (logTo) params.set('to', logTo)
-      if (logAction) params.set('action', logAction)
-      if (isExport) params.set('export', '1')
-      const res = await fetch(`/api/audit-logs?${params}`)
-      const data: AuditLog[] = await res.json()
-      if (isExport) {
-        exportToCsv(data)
-      } else {
-        setLogs(data)
-      }
-    } finally {
-      setLogLoading(false)
-    }
-  }, [logFrom, logTo, logAction])
-
-  useEffect(() => {
-    if (active === 'logs') fetchLogs()
-  }, [active, fetchLogs])
 
   return (
     <div className="flex gap-0 -m-5 h-[calc(100vh-130px)]">
@@ -177,90 +103,6 @@ export default function SettingsPage() {
                   บันทึก
                 </button>
               </CardBody>
-            </Card>
-          </div>
-        )}
-
-        {active === 'logs' && (
-          <div className="flex flex-col gap-4">
-            <h3 className="text-[12.5px] font-bold" style={{ color: 'var(--text-primary)' }}>System Log</h3>
-
-            {/* Filter bar */}
-            <div className="flex flex-wrap gap-2 items-center">
-              <div className="flex items-center gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>จาก</label>
-                <input type="date" value={logFrom} onChange={(e) => setLogFrom(e.target.value)}
-                  className="h-8 px-2 rounded-lg border text-xs"
-                  style={{ background: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }} />
-              </div>
-              <div className="flex items-center gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--text-muted)' }}>ถึง</label>
-                <input type="date" value={logTo} onChange={(e) => setLogTo(e.target.value)}
-                  className="h-8 px-2 rounded-lg border text-xs"
-                  style={{ background: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }} />
-              </div>
-              <select value={logAction} onChange={(e) => setLogAction(e.target.value)}
-                className="h-8 px-2 rounded-lg border text-xs"
-                style={{ background: 'var(--input-bg)', borderColor: 'var(--input-border)', color: 'var(--text-primary)' }}>
-                <option value="">ทุก Action</option>
-                {ALL_ACTIONS.map((a) => <option key={a} value={a}>{a}</option>)}
-              </select>
-              <button onClick={() => fetchLogs(false)}
-                className="h-8 px-3 rounded-lg text-xs font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-500 border-none cursor-pointer">
-                ค้นหา
-              </button>
-              <button onClick={() => fetchLogs(true)}
-                className="h-8 px-3 rounded-lg text-xs font-bold border cursor-pointer"
-                style={{ background: 'var(--bg-card)', borderColor: 'var(--border)', color: 'var(--text-primary)' }}>
-                Export CSV
-              </button>
-            </div>
-
-            {/* Table */}
-            <Card>
-              <div className="overflow-x-auto">
-                <table className="w-full text-[11px]">
-                  <thead>
-                    <tr style={{ background: 'var(--tab-bg)', borderBottom: '1px solid var(--border-light)' }}>
-                      {['วันเวลา', 'ผู้ใช้', 'Action', 'Resource', 'รายละเอียด'].map((h) => (
-                        <th key={h} className="px-3 py-2 text-left font-bold" style={{ color: 'var(--text-muted)' }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {logLoading ? (
-                      <tr><td colSpan={5} className="px-3 py-6 text-center" style={{ color: 'var(--text-muted)' }}>กำลังโหลด...</td></tr>
-                    ) : logs.length === 0 ? (
-                      <tr><td colSpan={5} className="px-3 py-6 text-center" style={{ color: 'var(--text-muted)' }}>ไม่มีข้อมูล</td></tr>
-                    ) : logs.map((log, i) => (
-                      <tr key={log.id} style={{ borderBottom: '1px solid var(--border-light)', background: i % 2 === 0 ? 'transparent' : 'var(--tab-bg)' }}>
-                        <td className="px-3 py-2 whitespace-nowrap" style={{ color: 'var(--text-secondary)' }}>
-                          {new Date(log.createdAt).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' })}
-                        </td>
-                        <td className="px-3 py-2" style={{ color: 'var(--text-primary)' }}>{log.userEmail || '—'}</td>
-                        <td className="px-3 py-2">
-                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                            log.action === 'LOGIN' ? 'bg-green-100 text-green-700' :
-                            log.action === 'LOGOUT' ? 'bg-gray-100 text-gray-600' :
-                            log.action.startsWith('DELETE') ? 'bg-red-100 text-red-600' :
-                            log.action.startsWith('CREATE') ? 'bg-blue-100 text-blue-700' :
-                            'bg-yellow-100 text-yellow-700'
-                          }`}>{log.action}</span>
-                        </td>
-                        <td className="px-3 py-2" style={{ color: 'var(--text-secondary)' }}>{log.resource}</td>
-                        <td className="px-3 py-2 max-w-[200px] truncate" style={{ color: 'var(--text-muted)' }}>
-                          {log.meta ? JSON.stringify(log.meta) : log.resourceId ?? '—'}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {logs.length > 0 && (
-                <div className="px-3 py-2 text-[10px] border-t" style={{ color: 'var(--text-muted)', borderColor: 'var(--border-light)' }}>
-                  แสดง {logs.length} รายการ
-                </div>
-              )}
             </Card>
           </div>
         )}

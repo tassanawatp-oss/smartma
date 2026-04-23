@@ -2,8 +2,6 @@ import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { prisma } from './prisma'
 import bcrypt from 'bcryptjs'
-import type { Role } from '@prisma/client'
-import { writeAudit, AUDIT_ACTION, AUDIT_RESOURCE } from './audit'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -35,28 +33,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string
-        session.user.role = token.role as Role
+        session.user.role = token.role as string
       }
       return session
-    },
-  },
-  events: {
-    signIn: async ({ user }) => {
-      writeAudit({
-        userId: user.id,
-        userEmail: user.email ?? '',
-        action: AUDIT_ACTION.LOGIN,
-        resource: AUDIT_RESOURCE.AUTH,
-      })
-    },
-    signOut: async (message) => {
-      const token = 'token' in message ? message.token : null
-      writeAudit({
-        userId: token?.id as string | undefined,
-        userEmail: (token?.email as string) ?? '',
-        action: AUDIT_ACTION.LOGOUT,
-        resource: AUDIT_RESOURCE.AUTH,
-      })
     },
   },
   pages: {

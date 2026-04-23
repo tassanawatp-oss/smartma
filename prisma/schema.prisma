@@ -45,10 +45,9 @@ model User {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  contracts  ContractMember[]
-  tickets    Ticket[]         @relation("AssignedTickets")
-  comments   Comment[]
-  auditLogs  AuditLog[]
+  contracts ContractMember[]
+  tickets   Ticket[]         @relation("AssignedTickets")
+  comments  Comment[]
 }
 
 model Contract {
@@ -138,17 +137,4 @@ model SyncLog {
   status     String
   message    String   @default("")
   createdAt  DateTime @default(now())
-}
-
-model AuditLog {
-  id         String   @id @default(cuid())
-  userId     String?
-  userEmail  String   @default("")
-  action     String
-  resource   String
-  resourceId String?
-  meta       Json?
-  createdAt  DateTime @default(now())
-
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

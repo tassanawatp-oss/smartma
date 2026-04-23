@@ -5,33 +5,13 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
-start.sh
-
-#OR
-
-#!/bin/bash
-set -e
-
-# Load environment variables from .env
-if [ -f "$(dirname "$0")/.env" ]; then
-  export $(grep -v '^#' "$(dirname "$0")/.env" | xargs)
-fi
-
-echo "==> Checking database connection..."
-if ! psql "$DATABASE_URL" -c '\q' 2>/dev/null; then
-  echo "ERROR: Cannot connect to database. Make sure PostgreSQL is running."
-  echo "  DATABASE_URL=$DATABASE_URL"
-  exit 1
-fi
-
-echo "==> Running database migrations..."
-npx prisma migrate deploy
-
-echo "==> Starting dev server at http://localhost:3456"
-PORT=3456 npm run dev
-~                                                                                                                                                                                                         
-~                                                                                                                                                                                                         
-~                                          
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
