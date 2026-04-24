@@ -1,4 +1,58 @@
 import { prisma } from './prisma'
+import crypto from 'crypto'
+
+// ---- Jira host validation (SSRF prevention) ----
+const PRIVATE_IP_RE = /^(localhost|127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/
+
+function validateJiraHost(host: string): void {
+  let hostname: string
+  try {
+    hostname = new URL(`https://${host}`).hostname
+  } catch {
+    throw new Error('Invalid Jira host')
+  }
+  if (PRIVATE_IP_RE.test(hostname)) {
+    throw new Error('Jira host must not be a private or loopback address')
+  }
+}
+
+// ---- Jira token encryption (AES-256-GCM) ----
+const ALGO = 'aes-256-gcm' as const
+const KEY_LEN = 32
+
+function getEncKey(): Buffer {
+  const raw = process.env.ENCRYPTION_KEY ?? ''
+  // Derive a fixed-length key via SHA-256 so any string length works
+  return crypto.createHash('sha256').update(raw).digest()
+}
+
+export function encryptToken(plaintext: string): string {
+  const key = getEncKey()
+  const iv = crypto.randomBytes(12)
+  const cipher = crypto.createCipheriv(ALGO, key, iv)
+  const enc = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()])
+  const tag = cipher.getAuthTag()
+  // Format: iv(12):tag(16):ciphertext — all hex
+  return `${iv.toString('hex')}:${tag.toString('hex')}:${enc.toString('hex')}`
+}
+
+export function decryptToken(stored: string): string {
+  const parts = stored.split(':')
+  if (parts.length !== 3) throw new Error('Invalid encrypted token format')
+  const [ivHex, tagHex, encHex] = parts
+  const key = getEncKey()
+  const iv = Buffer.from(ivHex, 'hex')
+  const tag = Buffer.from(tagHex, 'hex')
+  const enc = Buffer.from(encHex, 'hex')
+  const decipher = crypto.createDecipheriv(ALGO, key, iv)
+  decipher.setAuthTag(tag)
+  return decipher.update(enc).toString('utf8') + decipher.final('utf8')
+}
+
+// Detect whether a stored value is already encrypted (contains ':')
+function isEncrypted(value: string): boolean {
+  return value.split(':').length === 3
+}
 
 type JiraIssue = {
   key: string
@@ -33,13 +87,16 @@ function jiraStatusToLocal(jiraStatus: string): string {
 }
 
 async function fetchJira(host: string, email: string, token: string, path: string) {
+  validateJiraHost(host)
+  const plainToken = isEncrypted(token) ? decryptToken(token) : token
   const res = await fetch(`https://${host}/rest/api/3${path}`, {
     headers: {
-      Authorization: `Basic ${Buffer.from(`${email}:${token}`).toString('base64')}`,
+      Authorization: `Basic ${Buffer.from(`${email}:${plainToken}`).toString('base64')}`,
       Accept: 'application/json',
     },
+    signal: AbortSignal.timeout(30_000),
   })
-  if (!res.ok) throw new Error(`Jira API error ${res.status}: ${await res.text()}`)
+  if (!res.ok) throw new Error(`Jira API error ${res.status}`)
   return res.json()
 }
 

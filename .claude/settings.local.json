@@ -6,7 +6,16 @@
       "Bash(npx prisma *)",
       "Bash(npx ts-node *)",
       "Bash(npx tsc *)",
-      "Bash(npx next *)"
+      "Bash(npx next *)",
+      "Bash(node -e \"const path = require\\('path'\\); const cwd = '/Users/tassana/Workspace/product/github/smartma'; const from = ''; console.log\\('resolve empty:', path.resolve.call\\({}, from\\) || cwd\\); console.log\\('dirname:', path.dirname\\(path.resolve\\(from\\) || cwd\\)\\);\")",
+      "Read(//Users/tassana/Workspace/product/smartma/app/**)",
+      "Read(//Users/tassana/Workspace/product/smartma/**)",
+      "Bash(rsync -a --exclude=node_modules --exclude=.git --exclude=.next --exclude=.env /Users/tassana/Workspace/product/github/smartma/ /tmp/smartma-move-test/a/b/c/smartma/)",
+      "Read(//private/tmp/smartma-move-test/a/b/c/smartma/**)",
+      "Bash(npm install *)",
+      "Bash(timeout 20 node node_modules/next/dist/bin/next dev --port 3457)",
+      "Bash(node -e \"const { PrismaPg } = require\\('/Users/tassana/Workspace/product/github/smartma/node_modules/@prisma/adapter-pg'\\); console.log\\(typeof PrismaPg, Object.keys\\(require\\('/Users/tassana/Workspace/product/github/smartma/node_modules/@prisma/adapter-pg'\\)\\)\\)\")",
+      "Bash(node -e ' *)"
     ]
   }
 }

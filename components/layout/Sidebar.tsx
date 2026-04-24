@@ -86,7 +86,7 @@ export function Sidebar({ locale, userName, userRole }: { locale: string; userNa
             <div className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{userRole}</div>
           </div>
           <button
-            onClick={() => signOut({ callbackUrl: `${window.location.origin}/login` })}
+            onClick={() => signOut({ redirectTo: `${window.location.origin}/${locale}/login` })}
             title="Logout"
             className="w-7 h-7 rounded-md flex items-center justify-center text-sm border-none cursor-pointer flex-shrink-0 hover:bg-red-50"
             style={{ background: 'var(--tab-bg)', color: 'var(--text-muted)' }}
